@@ -31,6 +31,18 @@ pub mod fleet {
 
         let mut formatted_value = String::from(value);
 
+        let check_mark = vec![226, 152, 145];
+
+        let mut check_mark_str = String::from_utf8(check_mark).unwrap();
+
+        let space = vec![32];
+
+        let space_str = String::from_utf8(space).unwrap();
+
+        check_mark_str.push_str(&space_str);
+
+        formatted_value.insert_str(0, &check_mark_str);
+
         formatted_value.push_str("\n");
 
         file.write_all(formatted_value.as_bytes()).expect("Write failed");
