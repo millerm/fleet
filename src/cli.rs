@@ -1,10 +1,60 @@
 use clap::{Arg, App, AppSettings, SubCommand};
+use serde::{Serialize, Deserialize, Serializer};
+
+#[derive(Debug)]
+#[derive(Default, Serialize, Deserialize)]
+pub struct NoteConfig {
+    pub id: String,
+    pub content: String,
+}
+
+mod storage {
+    use std::error::Error;
+    use sled::{Config, IVec, Result};
+    use serde::ser::{Serialize, SerializeStruct, Serializer};
+    use bincode::{serialize, deserialize};
+    use crate::cli::NoteConfig;
+
+    pub fn insert(table: String, note: NoteConfig) {
+        println!("Inserting into {}", &table);
+        println!("{:?}", note);
+
+        let config = sled::Config::new().temporary(true);
+        let tree = config.open().expect("Error opening");
+
+        let bytes = bincode::serialize(&note).expect("error serializing");
+
+        let k = b"yo";
+
+        tree.insert(&k, bytes);
+
+        println!("successful insert");
+
+
+        println!("YO: {:?}", tree.get(&k));
+
+    }
+
+   // pub fn get_all(table: String) {}
+}
 
 pub mod fleet {
     use std::fs::File;
     use std::io::Read;
     use std::io::Write;
     use std::fs::OpenOptions;
+    use chrono::prelude::*;
+    use crate::cli::NoteConfig;
+
+
+    pub fn add_note(table: &str, content: &str) {
+        let new_note = NoteConfig {
+            id: String::from("1"),
+            content: content.to_string(),
+        };
+
+        crate::cli::storage::insert(table.to_string(), new_note);
+    }
 
     pub fn read_file(filename: &str) {
         match File::open(filename) {
@@ -13,7 +63,7 @@ pub mod fleet {
 
                 file.read_to_string(&mut content).unwrap();
 
-                println!("{}", content);
+                format!("{}", content);
             },
 
             Err(error) => {
@@ -95,7 +145,8 @@ pub fn run() {
             let filename = matches.value_of("file").unwrap();
             let value = matches.value_of("value").unwrap();
 
-            fleet::write_to_file(&filename, &value);
+//            fleet::write_to_file(&filename, &value);
+            fleet::add_note(&filename, &value);
         }
     }
 }
