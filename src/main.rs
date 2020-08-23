@@ -17,6 +17,15 @@ fn main() {
                 .takes_value(true)))
         .subcommand(SubCommand::with_name("read")
             .about("Reads contents from a file"))
+        .subcommand(SubCommand::with_name("delete")
+            .about("Deletes a note from the notes list")
+            .arg(Arg::with_name("id")
+                .short("i")
+                .long("id")
+                .value_name("ID")
+                .required(true)
+                .help("id of the note that should be deleted")
+                .takes_value(true)))
         .get_matches();
 
     if let Some(_matches) = _matches.subcommand_matches("read") {
@@ -25,6 +34,15 @@ fn main() {
 
     if let Some(_matches) = _matches.subcommand_matches("write") {
         let _value = _matches.value_of("value").unwrap();
+
         notes::fleet::insert(&_value).unwrap();
+    }
+
+    if let Some(_matches) = _matches.subcommand_matches("delete") {
+        let _id = _matches.value_of("id").unwrap();
+
+        let id_int: i32 = _id.parse().unwrap();
+
+        notes::fleet::delete_note(&id_int).unwrap();
     }
 }

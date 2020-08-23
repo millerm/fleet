@@ -20,6 +20,8 @@ pub mod fleet {
             params![_content.to_string()],
         )?;
 
+        println!("Note added");
+
         return Ok(());
     }
 
@@ -35,9 +37,24 @@ pub mod fleet {
         })?;
 
         for note in note_itr {
-            println!("Found note {:?}", note.unwrap());
+            let _n = note.unwrap();
+
+            println!("#{}: {}", _n.id, _n.content);
         }
 
         Ok(())
+    }
+
+    pub fn delete_note(id: &i32) -> Result<(), Error> {
+        let conn = Connection::open("fleet.db")?;
+
+        conn.execute(
+            "DELETE FROM note WHERE id = (?1)",
+            params![id],
+        )?;
+
+        println!("Deleted note with id: {}", id);
+
+        return Ok(());
     }
 }
