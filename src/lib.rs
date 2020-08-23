@@ -1,35 +1,43 @@
 pub mod fleet {
-    use chrono::prelude::*;
-    use serde::{Serialize, Deserialize, Serializer};
-    use std::error::Error;
-    use sled::{Config, IVec, Result};
-    use bincode::{serialize, deserialize};
+    use rusqlite::{ Connection, params, Error };
 
     #[derive(Debug)]
-    #[derive(Default, Serialize, Deserialize)]
-    pub struct NoteConfig {
-        pub id: String,
-        pub content: String,
+    pub struct Note {
+        id: i32,
+        content: String
     }
 
-    pub fn insert(table: String, note: NoteConfig) {
-        let tree = sled::open(table).expect("Error opening");
-        let bytes = bincode::serialize(&note).expect("error serializing");
-        // TODO: generate Key
-        let k = b"key";
+    pub fn insert(_content: &str) -> Result<(), Error> {
+        let conn = Connection::open("fleet.db")?;
 
-        tree.insert(&k, bytes);
+        conn.execute("CREATE TABLE IF NOT EXISTS note (
+                id INTEGER PRIMARY KEY,
+                content TEXT NOT NULL
+        )", params![]).unwrap();
 
-        println!("successful insert");
+        conn.execute(
+            "INSERT INTO note (content) VALUES (?1)",
+            params![_content.to_string()],
+        )?;
+
+        return Ok(());
     }
 
-    pub fn create_note(table: &str, content: &str) {
-        // TODO: Generate ID
-        let new_note = NoteConfig {
-            id: String::from("1"),
-            content: content.to_string(),
-        };
+    pub fn get_all() -> Result<(), Error> {
+        let conn = Connection::open("fleet.db")?;
+        let mut stmt = conn.prepare("SELECT id, content from note")?;
 
-        insert(table.to_string(), new_note);
+        let note_itr = stmt.query_map(params![], |row| {
+            Ok(Note {
+                id: row.get(0)?,
+                content: row.get(1)?,
+            })
+        })?;
+
+        for note in note_itr {
+            println!("Found note {:?}", note.unwrap());
+        }
+
+        Ok(())
     }
 }
