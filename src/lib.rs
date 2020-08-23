@@ -1,6 +1,9 @@
 pub mod fleet {
     use chrono::prelude::*;
     use serde::{Serialize, Deserialize, Serializer};
+    use std::error::Error;
+    use sled::{Config, IVec, Result};
+    use bincode::{serialize, deserialize};
 
     #[derive(Debug)]
     #[derive(Default, Serialize, Deserialize)]
@@ -9,24 +12,15 @@ pub mod fleet {
         pub content: String,
     }
 
-    pub mod storage {
-        use serde::{Serialize, Deserialize, Serializer};
-        use std::error::Error;
-        use sled::{Config, IVec, Result};
-        use bincode::{serialize, deserialize};
-        use crate::fleet::NoteConfig;
+    pub fn insert(table: String, note: NoteConfig) {
+        let tree = sled::open(table).expect("Error opening");
+        let bytes = bincode::serialize(&note).expect("error serializing");
+        // TODO: generate Key
+        let k = b"key";
 
-        pub fn insert(table: String, note: NoteConfig) {
-            let config = sled::Config::new().temporary(true);
-            let tree = config.open().expect("Error opening");
-            let bytes = bincode::serialize(&note).expect("error serializing");
-            // TODO: generate Key
-            let k = b"key";
+        tree.insert(&k, bytes);
 
-            tree.insert(&k, bytes);
-
-            println!("successful insert");
-        }
+        println!("successful insert");
     }
 
     pub fn create_note(table: &str, content: &str) {
@@ -36,6 +30,6 @@ pub mod fleet {
             content: content.to_string(),
         };
 
-        storage::insert(table.to_string(), new_note);
+        insert(table.to_string(), new_note);
     }
 }
