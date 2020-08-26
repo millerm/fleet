@@ -20,7 +20,7 @@ pub mod fleet {
             params![_content.to_string()],
         )?;
 
-        println!("Note added");
+        println!("Note added with content: {}", _content.to_string());
 
         return Ok(());
     }

@@ -6,14 +6,14 @@ fn main() {
         .version("1.0")
         .author("Marshall M. <MarshallDavidMiller@gmail.com>")
         .about("A CLI tool to quickly add/edit/manage notes")
-        .subcommand(SubCommand::with_name("write")
-            .about("Writes to a file")
-            .arg(Arg::with_name("value")
-                .short("v")
-                .long("value")
-                .value_name("VALUE")
+        .subcommand(SubCommand::with_name("create")
+            .about("Creates a new note with the content supplied")
+            .arg(Arg::with_name("content")
+                .short("c")
+                .long("content")
+                .value_name("CONTENT")
                 .required(true)
-                .help("value that should be appended to the file")
+                .help("content that should be added to the list of notes")
                 .takes_value(true)))
         .subcommand(SubCommand::with_name("read")
             .about("Reads contents from a file"))
@@ -32,8 +32,8 @@ fn main() {
         notes::fleet::get_all().unwrap();
     }
 
-    if let Some(_matches) = _matches.subcommand_matches("write") {
-        let _value = _matches.value_of("value").unwrap();
+    if let Some(_matches) = _matches.subcommand_matches("create") {
+        let _value = _matches.value_of("content").unwrap();
 
         notes::fleet::insert(&_value).unwrap();
     }
