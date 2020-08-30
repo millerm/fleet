@@ -1,5 +1,8 @@
 pub mod fleet {
     use rusqlite::{ Connection, params, Error };
+    use std::path::Path;
+    extern crate dirs;
+    use std::ffi::OsString;
 
     #[derive(Debug)]
     pub struct Note {
@@ -8,7 +11,12 @@ pub mod fleet {
     }
 
     pub fn insert(_content: &str) -> Result<(), Error> {
-        let conn = Connection::open("fleet.db")?;
+        let home = match dirs::home_dir() {
+            None => OsString::new(),
+            Some(dir) => dir.into_os_string(),
+        };
+        let path = Path::new(&home).join("fleet.db");
+        let conn = Connection::open(path)?;
 
         conn.execute("CREATE TABLE IF NOT EXISTS note (
                 id INTEGER PRIMARY KEY,
@@ -26,9 +34,13 @@ pub mod fleet {
     }
 
     pub fn get_all() -> Result<(), Error> {
-        let conn = Connection::open("fleet.db")?;
+        let home = match dirs::home_dir() {
+            None => OsString::new(),
+            Some(dir) => dir.into_os_string(),
+        };
+        let path = Path::new(&home).join("fleet.db");
+        let conn = Connection::open(path)?;
         let mut stmt = conn.prepare("SELECT id, content from note")?;
-
         let note_itr = stmt.query_map(params![], |row| {
             Ok(Note {
                 id: row.get(0)?,
@@ -46,7 +58,12 @@ pub mod fleet {
     }
 
     pub fn delete_note(id: &i32) -> Result<(), Error> {
-        let conn = Connection::open("fleet.db")?;
+        let home = match dirs::home_dir() {
+            None => OsString::new(),
+            Some(dir) => dir.into_os_string(),
+        };
+        let path = Path::new(&home).join("fleet.db");
+        let conn = Connection::open(path)?;
 
         conn.execute(
             "DELETE FROM note WHERE id = (?1)",
