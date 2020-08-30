@@ -15,7 +15,6 @@ See the pre-release for a binary and source.
 ```
 .zshrc
 
-...
 # Fleet
 alias fleet='/Users/<dir>/fleet'
 alias fh='fleet --help'
