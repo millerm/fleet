@@ -11,6 +11,17 @@ See the pre-release for a binary and source.
 2. While in the directory, run `tar -xf fleet-v1.tar.gz` to extract the application
 3. Run `./fleet --help` to get started (note, by default, your Sqlite DB will be set up in your home directory (example: `/Users/alice/fleet.db`)
 
+### Suggested .bashrc or .zshrc alias:
+```
+.zshrc
+
+...
+# Fleet
+alias fleet='/Users/<dir>/fleet'
+alias fh='fleet --help'
+alias fc='fleet create --content'
+alias fr='fleet read'
+```
 
 ## To Run or Edit:
 1. Download repository
