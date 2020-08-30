@@ -1,4 +1,5 @@
 use clap::{Arg, App, AppSettings, SubCommand};
+use std::process;
 
 fn main() {
     let _matches = App::new("Fleet")
@@ -29,20 +30,33 @@ fn main() {
         .get_matches();
 
     if let Some(_matches) = _matches.subcommand_matches("read") {
-        notes::fleet::get_all().unwrap();
+        fleet::core::get_all().unwrap_or_else(|err| {
+            eprintln!("An error while trying to read your notes: {}", err);
+            process::exit(1);
+        });
     }
 
     if let Some(_matches) = _matches.subcommand_matches("create") {
         let _value = _matches.value_of("content").unwrap();
 
-        notes::fleet::insert(&_value).unwrap();
+        fleet::core::insert(&_value).unwrap_or_else(|err| {
+            eprintln!("An error while trying to create your note: {}", err);
+            process::exit(1);
+        });
     }
 
     if let Some(_matches) = _matches.subcommand_matches("delete") {
-        let _id = _matches.value_of("id").unwrap();
+        if _matches.is_present("id") {
+            let _id = _matches.value_of("id").unwrap();
+            let id_int: i32 = _id.parse().unwrap();
 
-        let id_int: i32 = _id.parse().unwrap();
-
-        notes::fleet::delete_note(&id_int).unwrap();
+            fleet::core::delete_note(&id_int).unwrap_or_else(|err| {
+                eprintln!("Error while trying to delete your note: {}", err);
+                process::exit(1);
+            });
+        } else {
+            eprintln!("Please provide the id of the note you wish to delete!");
+            process::exit(1);
+        }
     }
 }

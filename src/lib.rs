@@ -1,6 +1,7 @@
-pub mod fleet {
+pub mod core {
     use rusqlite::{ Connection, params, Error };
     use std::path::Path;
+    use std::process;
     extern crate dirs;
     use std::ffi::OsString;
 
@@ -21,7 +22,7 @@ pub mod fleet {
         conn.execute("CREATE TABLE IF NOT EXISTS note (
                 id INTEGER PRIMARY KEY,
                 content TEXT NOT NULL
-        )", params![]).unwrap();
+        )", params![])?;
 
         conn.execute(
             "INSERT INTO note (content) VALUES (?1)",
@@ -49,7 +50,10 @@ pub mod fleet {
         })?;
 
         for note in note_itr {
-            let _n = note.unwrap();
+            let _n = note.unwrap_or_else(|err| {
+                eprintln!("Problem reading note! Error: {}", err);
+                process::exit(1);
+            });
 
             println!("#{}: {}", _n.id, _n.content);
         }
